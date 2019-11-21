@@ -6,13 +6,6 @@
     <link rel="stylesheet" type="text/css" href="/static/mod.css"/>
 {% endblock %}
 {% block body %}
-{% if mod.background %}
-<div class="header" style="background-image: url({{ mod.background }});
-    background-position: 0 {% if mod.bgOffsetY %}{{ mod.bgOffsetY }}px{% else %}0{% endif %};"></div>
-{% else %}
-<div class="header" style="background-image: url(/static/background.jpg);"></div>
-{% endif %}
-
 {% if new %}
 <div class="well info well-sm">
     <div class="container">
@@ -74,10 +67,17 @@
 
 <div class="info-list">
     <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="timeline-centered">
-                    
+        <div class="row vertical-centered">
+            <div class="col-md-5">
+                {% if mod.background %}
+                    <img src="{{ mod.background }}" alt="Mod thumbnail" style="width: 100%" />
+                {% else %}
+                    <img src="/static/background.jpg" alt="Mod thumbnail" style="width: 100%" />
+                {% endif %}
+            </div>
+            <div class="col-md-7">
+                {# 23px is roughly what the timeline-entries have as bottom "padding" (63px full size - 40px icon size) #}
+                <div class="timeline-centered" style="margin-top: 23px">
                     <div class="timeline-entry">
                         <div class="timeline-entry-inner">
                             <div class="timeline-icon">
@@ -143,94 +143,87 @@
                             </div>
                         </div>
                     </div>
-                    
-                </div>
-            </div>
 
-            <div class="col-md-6">
-                <div class="timeline-centered">
-                    
                     <div class="timeline-entry">
-                        <div class="timeline-entry-inner">
-                            <div class="timeline-icon">
-                                <span class="glyphicon glyphicon-user"></span>
-                            </div>
-                            <div class="timeline-label">
-                                <h2>
-                                    <span class="text-muted">
-                                        {% if total_authors == 1 %}
-                                        Author:
-                                        {% else %}
-                                        Authors:
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon">
+                                    <span class="glyphicon glyphicon-user"></span>
+                                </div>
+                                <div class="timeline-label">
+                                    <h2>
+                                        <span class="text-muted">
+                                            {% if total_authors == 1 %}
+                                            Author:
+                                            {% else %}
+                                            Authors:
+                                            {% endif %}
+                                        </span>
+                                        <a href="/profile/{{ mod.user.username }}">{{ mod.user.username }}</a>{%if total_authors != 1%},{%endif %}
+                                        {% for author in mod.shared_authors %}
+                                        {% if author.accepted %}
+                                        <a href="/profile/{{ author.user.username }}">{{ author.user.username }}</a>{%if not loop.last%},{%endif%}
                                         {% endif %}
-                                    </span>
-                                    <a href="/profile/{{ mod.user.username }}">{{ mod.user.username }}</a>{%if total_authors != 1%},{%endif %}
-                                    {% for author in mod.shared_authors %}
-                                    {% if author.accepted %}
-                                    <a href="/profile/{{ author.user.username }}">{{ author.user.username }}</a>{%if not loop.last%},{%endif%}
-                                    {% endif %}
-                                    {% endfor %}
-                                </h2>
+                                        {% endfor %}
+                                    </h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {% if mod.external_link %}
-                    <div class="timeline-entry">
-                        <div class="timeline-entry-inner">
-                            <div class="timeline-icon">
-                                <span class="glyphicon glyphicon-globe"></span>
-                            </div>
-                            <div class="timeline-label">
-                                <h2>
-                                    <span class="text-muted">
-                                        Mod Website:
-                                    </span>
-                                    {% if forum_thread %}
-                                    <a href="{{ mod.external_link }}">Forum Thread</a>
-                                    {% else %}
-                                    <a href="{{ mod.external_link }}">{{ mod.external_link }}</a>
-                                    {% endif %}
-                                </h2>
+                        {% if mod.external_link %}
+                        <div class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon">
+                                    <span class="glyphicon glyphicon-globe"></span>
+                                </div>
+                                <div class="timeline-label">
+                                    <h2>
+                                        <span class="text-muted">
+                                            Mod Website:
+                                        </span>
+                                        {% if forum_thread %}
+                                        <a href="{{ mod.external_link }}">Forum Thread</a>
+                                        {% else %}
+                                        <a href="{{ mod.external_link }}">{{ mod.external_link }}</a>
+                                        {% endif %}
+                                    </h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    {% endif %}
+                        {% endif %}
 
-                    {% if mod.donation_link %}
-                    <div class="timeline-entry">
-                        <div class="timeline-entry-inner">
-                            <div class="timeline-icon">
-                                <span class="glyphicon glyphicon-gift"></span>
-                            </div>
-                            <div class="timeline-label">
-                                <h2>
-                                    <span class="text-muted">
-                                        Support this mod:
-                                    </span>
-                                    <a href="{{ mod.donation_link }}">Donate</a>
-                                </h2>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="timeline-entry">
-                        <div class="timeline-entry-inner">
-                            <div class="timeline-icon">
-                                <span class="glyphicon glyphicon-heart"></span>
-                            </div>
-                            <div class="timeline-label">
-                                <h2>
-                                    <span class="text-muted">
-                                        Followers:
-                                    </span>
-                                    {{ "{:,}".format(mod.follower_count) }}
-                                </h2>
+                        {% if mod.donation_link %}
+                        <div class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon">
+                                    <span class="glyphicon glyphicon-gift"></span>
+                                </div>
+                                <div class="timeline-label">
+                                    <h2>
+                                        <span class="text-muted">
+                                            Support this mod:
+                                        </span>
+                                        <a href="{{ mod.donation_link }}">Donate</a>
+                                    </h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
+                        {% endif %}
+
+                        <div class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon">
+                                    <span class="glyphicon glyphicon-heart"></span>
+                                </div>
+                                <div class="timeline-label">
+                                    <h2>
+                                        <span class="text-muted">
+                                            Followers:
+                                        </span>
+                                        {{ "{:,}".format(mod.follower_count) }}
+                                    </h2>
+                                </div>
+                            </div>
+                        </div>
                 </div>
             </div>
         </div>

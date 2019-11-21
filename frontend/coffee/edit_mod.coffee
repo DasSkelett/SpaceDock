@@ -17,7 +17,7 @@ window.upload_bg = (files, box) ->
             progress.style.width = (e.loaded / e.total) * 100 + '%'
     xhr.onload = (e) ->
         if xhr.status != 200
-            p.textContent = 'Please upload JPG or PNG only.'
+            p.textContent = 'Something went wrong. Please upload JPG or PNG only.'
             setTimeout(() ->
                 box.removeChild(p)
                 box.querySelector('a').classList.remove('hidden')
@@ -26,7 +26,7 @@ window.upload_bg = (files, box) ->
             resp = JSON.parse(xhr.responseText)
             p.textContent = 'Done!'
             document.getElementById('background').value = resp.path
-            document.getElementById('header-well').style.backgroundImage = 'url("' + resp.path + '")'
+            document.getElementById('background-img').src = resp.path
             setTimeout(() ->
                 box.removeChild(p)
                 box.querySelector('a').classList.remove('hidden')
