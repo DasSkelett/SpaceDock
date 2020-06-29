@@ -134,3 +134,12 @@ if donation_alert
     donation_alert.addEventListener('click', (e) ->
         createCookie('dismissed_donation', 'true')
     , false)
+
+$('#cookie-hide').click((e) ->
+    e.preventDefault()
+    createCookie('hide_cookie_banner', 'true', 365 * 10)
+    $('#cookie-banner').hide()
+)
+
+if readCookie('hide_cookie_banner') == 'true'
+    $('#cookie-banner').hide()

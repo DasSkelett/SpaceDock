@@ -168,6 +168,13 @@
         </div>
         {% endif %}
         {% block body %}{% endblock %}
+        <div id="cookie-banner" class="bg-primary" style="position: fixed; bottom: 0; width: 100%; padding: 20px">
+            {{ site_name }} needs to use so-called cookies to work.
+            It only saves cookies which are strictly necessary for {{ site_name }} to work,
+            like a session cookie to remember whether you are logged in.
+            For more information, see the <a href="{{ url_for('anonymous.privacy') }}">privacy</a> page.
+            <a id="cookie-hide" class="btn btn-large btn-default" href="#">Hide</a>
+        </div>
         <footer>
             <div class="container centered">
                 <hr />
@@ -176,7 +183,7 @@
                         <ul class="nav nav-pills nav-justified">
                             <li><a href="{{ source_code }}">Source Code</a></li>
                             <li><a href="{{ source_code }}/blob/master/api.md">API</a></li>
-                            <li><a href="/privacy">Terms & Privacy</a></li>
+                            <li><a href="{{ url_for('anonymous.privacy') }}">Terms & Privacy</a></li>
                             <li><a href="mailto:{{ support_mail }}">Support</a></li>
                             {% for key, value in support_channels.items() %}
                             {% if value %}
