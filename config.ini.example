@@ -84,8 +84,11 @@ google_analytics_domain=
 # Blog comments
 disqus_id=
 
-# Thumbnail size in WxH format, leave blank to disable screenshots
+# Thumbnail size in WxH format. Defaults to 320x320 if not set.
+# The aspect ratio of the original image is preserved, so both values (width and height) only serve as an upper bound.
 thumbnail_size=320x320
+# Thumbnail quality, between 0 and 100. Defaults to 80 if not set.
+thumbnail_quality=80
 
 # URL to notify of mod creation
 create-url=
