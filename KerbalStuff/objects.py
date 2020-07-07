@@ -169,7 +169,7 @@ class Mod(Base):  # type: ignore
     background = Column(String(512))
     bgOffsetX = Column(Integer)
     bgOffsetY = Column(Integer)
-    default_version_id = Column(Integer, ForeignKey('modversion.id'))
+    default_version_id = Column(Integer, ForeignKey('modversion.id'), nullable=False)
     default_version = relationship('ModVersion',
                                    foreign_keys=default_version_id,
                                    post_update=True)

@@ -666,7 +666,9 @@ def create_mod() -> Union[Dict[str, Any], Tuple[Dict[str, Any], int]]:
     version = ModVersion(friendly_version=mod_friendly_version,
                          gameversion_id=game_version.id,
                          download_path=relative_path)
-    # create the mod
+    db.add(version)
+    # Commit the version now, we need the id below.
+    db.commit()
     mod = Mod(user=current_user,
               name=mod_name,
               short_description=short_description,
@@ -674,7 +676,8 @@ def create_mod() -> Union[Dict[str, Any], Tuple[Dict[str, Any], int]]:
               license=mod_licence,
               ckan=ckan in TRUE_STR,
               game=game,
-              default_version=version)
+              default_version=version,
+              default_version_id=version.id)
     version.mod = mod
     # Save database entry
     db.add(mod)
