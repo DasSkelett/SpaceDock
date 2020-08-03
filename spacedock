@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import itertools
 import os
 import sys
+from datetime import datetime
 
 import click
 from werkzeug.utils import secure_filename
@@ -123,6 +125,148 @@ def populate_database():
         db.add(game_version)
         db.commit()
         site_logger.info('Created KSP version 1.0')
+
+
+@cli_db.command('seed')
+def seed_database():
+    # As of now this has to be run right after populate_database, without having touched the db in any way.
+    # ./spacedock database drop && ./spacedock database initialize && ./spacedock database populate && ./spacedock database seed
+    from KerbalStuff.objects import User, Publisher, Game, GameVersion, Mod, ModVersion, DownloadEvent
+
+    # Create a publisher
+    publisher_name = 'Seeding Publisher'
+    if not Publisher.query.filter(Publisher.name == publisher_name).count():
+        publisher = Publisher(name=publisher_name)
+        db.add(publisher)
+        db.commit()
+    publisher_id = Publisher.query.filter(Publisher.name == publisher_name).one().id
+
+    site_logger.info(f'Created {publisher_name}')
+
+    # Create a game
+    game_name = 'Seeding Game'
+    if not Game.query.filter(Game.name == game_name).count():
+        game = Game(name=game_name,
+                    publisher_id=publisher_id,
+                    short='seeding-game',
+                    active=True)
+        db.add(game)
+        db.commit()
+    game_id = Game.query.filter(Game.name == game_name).one().id
+
+    site_logger.info(f'Created {game_name}')
+
+    # Create a game version
+    gameversion_name = 'seeding-1.0'
+    if not GameVersion.query\
+            .filter(GameVersion.game_id == game_id, GameVersion.friendly_version == gameversion_name).count():
+        gameversion = GameVersion(friendly_version=gameversion_name,
+                                  game_id=game_id)
+        db.add(gameversion)
+        db.commit()
+    gameversion_id = GameVersion.query\
+        .filter(GameVersion.game_id == game_id, GameVersion.friendly_version == gameversion_name).one().id
+
+    site_logger.info(f'Created {game_name} version {gameversion_name}')
+    user_count = 50000
+    if User.query.count() < user_count:
+        # Create users
+        # TODO users = (User(...) for i in range(user_count))
+        site_logger.info(f'Creating users...')
+        users = list()
+        for i in range(1, user_count+1):
+            user_name = f'Seeding User {i}'
+            user = User(username=user_name,
+                        email=f'{user_name}@example.com',
+                        password='UNHASHED-PASSWORD',
+                        public=True)
+
+            users.append(user)
+            if i % (user_count/10) == 0:
+                site_logger.info(f'Created {i} users, {user_count - i} to go')
+
+        db.bulk_save_objects(users)
+        db.commit()
+
+        # Create mods
+        site_logger.info(f'Creating mods...')
+        mods = list()
+        mod_count = 10000
+        for i in range(1, mod_count+1):
+            mod_name = f'Seeding Mod {i}'
+            mod = Mod(user_id=i+2,
+                      name=mod_name,
+                      short_description='Short description',
+                      description='Long description',
+                      license='MIT',
+                      ckan=False,
+                      published=True,
+                      game_id=game_id)
+            mods.append(mod)
+            if i % (mod_count/10) == 0:
+                site_logger.info(f'Created {i} mods, {mod_count - i} to go')
+
+        db.bulk_save_objects(mods)
+        db.commit()
+        mods = Mod.query.filter(Mod.game_id == game_id).all()
+
+        # Create 10 mod versions per mod -> 100 000
+        site_logger.info(f'Creating mod versions...')
+        mod_version_count = 10
+        for i in range(1, mod_count+1):
+            mod_versions = list()
+            for k in range(1, mod_version_count+1):
+                mod_version_name = mods[i-1].name + f' Version {k}'
+                mod_version = ModVersion(friendly_version=mod_version_name,
+                                         gameversion_id=gameversion_id,
+                                         download_path='./seed.zip',
+                                         sort_index=k,
+                                         mod_id=i)
+                mod_versions.append(mod_version)
+
+            db.bulk_save_objects(mod_versions)
+            mods[i-1].default_version_id = (i-1)*mod_version_count + 1
+            if i % (mod_count/10) == 0:
+                site_logger.info(f'Created versions for {i} mods, {mod_count - i} to go')
+
+        db.commit()
+
+        # Create 500 download events per mod version -> 50 000 000
+        site_logger.info(f'Creating download events...')
+        download_event_count = 100
+
+        # for i in range(1, mod_count+1):
+            # for k in range(1, mod_version_count+1):
+                # de = DownloadEvent(mod_id=i,
+                #                    version_id=i*k,
+                #                    downloads=1000,
+                #                    created=date)
+                # download_events = [de] * download_event_count
+                # db.bulk_save_objects(download_events)
+                # x = (i-1) * mod_version_count + k
+        listoflists = [
+            [
+                itertools.repeat(
+                    {"mod_id": i, "version_id": (i - 1) * mod_version_count + k, "downloads": 1000},
+                    download_event_count
+                )
+                for k in range(1, mod_version_count+1)
+            ]
+            for i in range(1, mod_count+1)
+        ]
+
+        flat = itertools.chain.from_iterable(itertools.chain.from_iterable(listoflists))
+        engine.execute(
+            DownloadEvent.__table__.insert(),
+            list(flat)
+        )
+
+        #    if i % (mod_count / 10) == 0:
+                # db.commit()
+        #        site_logger.info(f'Created {i*mod_version_count*download_event_count} download events for {i} mods')
+
+    db.commit()
+    site_logger.info('Database seeding finished')
 
 
 cli_db.command('drop')(drop_database)
