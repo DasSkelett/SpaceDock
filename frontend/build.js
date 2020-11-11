@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const sass = require('node-sass');
 const browserify = require('browserify');
@@ -9,11 +9,17 @@ const tildeImporter = require('node-sass-tilde-importer');
 const paths = {
     input: {
         styles: 'styles',
-        scripts: 'coffee'
+        scripts: 'coffee',
+        adminlte_js: 'node_modules/admin-lte/dist/js/adminlte.min.js',
+        adminlte_css: 'node_modules/admin-lte/dist/css/adminlte.min.css',
+        adminlte_plugins: 'node_modules/admin-lte/plugins'
     },
     output: {
         styles: 'build',
-        scripts: 'build'
+        scripts: 'build',
+        adminlte_js: 'build',
+        adminlte_css: 'build',
+        adminlte_plugins: 'build'
     }
 };
 
@@ -25,6 +31,13 @@ function walkDir(dir, callback) {
             ? walkDir(dirPath, callback)
             : callback(path.join(dir, f));
     });
+}
+
+function copyFileToDir(inputFile, outputDir) {
+    var fileName = path.basename(inputFile);
+    var outputFile = path.join(outputDir, fileName);
+    fs.copySync(inputFile, outputFile)
+    console.log(`Copied "${fileName}" to "${outputDir}"`);
 }
 
 for (let path in paths.output) {
@@ -85,3 +98,8 @@ walkDir(paths.input.scripts, inputFile => {
         }
     });
 });
+
+
+copyFileToDir(paths.input.adminlte_js, paths.output.adminlte_js)
+copyFileToDir(paths.input.adminlte_css, paths.output.adminlte_css)
+copyFileToDir(paths.input.adminlte_plugins, paths.output.adminlte_plugins)

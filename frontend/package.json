@@ -18,6 +18,7 @@
     "sass": "^1.22.9"
   },
   "dependencies": {
+    "admin-lte": "^3.0.5",
     "dropzone": "^5.7.1"
   },
   "coffeelintConfig": {
