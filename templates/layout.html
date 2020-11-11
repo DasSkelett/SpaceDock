@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% block title -%}
+    <title>{{ site_name }}</title>
+{% endblock -%}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="spacedock.css">
+{% block styles -%}
+{% endblock -%}
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+{% block body -%}
+{% endblock -%}
+</div>
+{% block scripts -%}
+{% endblock -%}
+</body>
+</html>
