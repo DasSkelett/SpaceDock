@@ -1,5 +1,7 @@
 editor = new Editor()
 editor.render()
+pack_list = window.pack_list
+new_mod = null
 
 window.upload_bg = (files, box) ->
     file = files[0]
@@ -10,35 +12,31 @@ window.upload_bg = (files, box) ->
     box.querySelector('a').classList.add('hidden')
     progress = box.querySelector('.upload-progress')
 
-    MediaCrush.upload(file, (media) ->
-        progress.classList.add('fade-out')
-        progress.style.width = '100%'
-        p.textContent = 'Processing...'
-        media.wait(() ->
-            MediaCrush.get(media.hash, (media) ->
-                p.textContent = 'Done'
-                path = null
-                for file in media.files
-                    if file.type == 'image/png' or file.type == 'image/jpeg'
-                        path = file
-                if path == null
-                    p.textContent = 'Please upload images only.'
-                else
-                    document.getElementById('background').value = path.file
-                    document.getElementById('header-well').style.backgroundImage = 'url("https://mediacru.sh/' + path.file + '")'
-                    setTimeout(() ->
-                        box.removeChild(p)
-                        box.querySelector('a').classList.remove('hidden')
-                    , 3000)
-            )
-        )
-    , (e) ->
+    xhr = new XMLHttpRequest()
+    xhr.open('POST', "/api/pack/#{window.pack_id}/update-bg")
+    xhr.setRequestHeader('Accept', 'application/json')
+    xhr.upload.onprogress = (e) ->
         if e.lengthComputable
             progress.style.width = (e.loaded / e.total) * 100 + '%'
-    )
-
-pack_list = window.pack_list
-new_mod = null
+    xhr.onload = (e) ->
+        if xhr.status != 200
+            p.textContent = 'Please upload JPG or PNG only.'
+            setTimeout(() ->
+                box.removeChild(p)
+                box.querySelector('a').classList.remove('hidden')
+            , 3000)
+        else
+            resp = JSON.parse(xhr.responseText)
+            p.textContent = 'Done!'
+            document.getElementById('background').value = resp.path
+            document.getElementById('header-well').style.backgroundImage = 'url("' + resp.path + '")'
+            setTimeout(() ->
+                box.removeChild(p)
+                box.querySelector('a').classList.remove('hidden')
+            , 3000)
+    formdata = new FormData()
+    formdata.append('image', file)
+    xhr.send(formdata)
 
 enableDisableAddModButton = ->
     btn = $("#add-mod-button")
@@ -88,7 +86,6 @@ document.getElementById('add-mod-button').addEventListener('click', (e) ->
         container.style.backgroundImage = "url('" + new_mod.background + "')"
     else
         container.style.backgroundImage = "url('/static/background-s.jpg')"
-    container.style.backgroundPosition = '0 ' + new_mod.bg_offset_y + 'px'
     container.dataset.mod = new_mod.id
     default_version = new_mod.versions.find((v) -> v.id == new_mod.default_version_id)
     container.innerHTML = """

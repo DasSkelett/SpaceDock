@@ -59,8 +59,6 @@ class User(Base):  # type: ignore
     passwordReset = Column(String(128))
     passwordResetExpiry = Column(DateTime)
     backgroundMedia = Column(String(512), default='')
-    bgOffsetX = Column(Integer, default=0)
-    bgOffsetY = Column(Integer, default=0)
     following = relationship('Mod', secondary=mod_followers, backref='followers')
     dark_theme = Column(Boolean, default=False)
 
@@ -112,8 +110,6 @@ class Publisher(Base):  # type: ignore
     created = Column(DateTime, default=datetime.now)
     updated = Column(DateTime, default=datetime.now)
     background = Column(String(512))
-    bgOffsetX = Column(Integer)
-    bgOffsetY = Column(Integer)
     link = Column(Unicode(1024))
 
     def __repr__(self) -> str:
@@ -137,8 +133,6 @@ class Game(Base):  # type: ignore
     created = Column(DateTime, default=datetime.now, index=True)
     updated = Column(DateTime, default=datetime.now)
     background = Column(String(512))
-    bgOffsetX = Column(Integer)
-    bgOffsetY = Column(Integer)
     link = Column(Unicode(1024))
 
     # Match beginnings of words and capital letters (for StudlyCapsNames)
@@ -178,8 +172,6 @@ class Mod(Base):  # type: ignore
     votes = Column(Integer, default=0)
     score = Column(Float, default=0, nullable=False, index=True)
     background = Column(String(512))
-    bgOffsetX = Column(Integer)
-    bgOffsetY = Column(Integer)
     default_version_id = Column(Integer, ForeignKey('modversion.id'))
     default_version = relationship('ModVersion',
                                    foreign_keys=default_version_id,
@@ -204,8 +196,7 @@ class ModList(Base):  # type: ignore
     user = relationship('User', backref=backref('packs', order_by=created))
     game_id = Column(Integer, ForeignKey('game.id'))
     game = relationship('Game', backref='modlists')
-    background = Column(String(32))
-    bgOffsetY = Column(Integer)
+    background = Column(String(512))
     description = Column(Unicode(100000))
     short_description = Column(Unicode(1000))
     name = Column(Unicode(1024))

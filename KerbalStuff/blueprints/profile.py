@@ -73,13 +73,7 @@ def profile(username: str) -> Union[str, werkzeug.wrappers.Response]:
                 profile.forumId = match.groups()[0]
         profile.ircNick = request.form.get('irc-nick')
         profile.backgroundMedia = request.form.get('backgroundMedia')
-        bgOffsetX = request.form.get('bg-offset-x')
-        bgOffsetY = request.form.get('bg-offset-y')
         profile.dark_theme = False
-        if bgOffsetX:
-            profile.bgOffsetX = int(bgOffsetX)
-        if bgOffsetY:
-            profile.bgOffsetY = int(bgOffsetY)
         return redirect("/profile/" + profile.username)
 
 

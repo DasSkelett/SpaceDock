@@ -1,10 +1,7 @@
-@import "stylesheet";
 @import "~dropzone/dist/dropzone";
 
 .header {
     height: 250px;
-    background: url('/static/background.png') center center fixed;
-    background-size: cover;
     color: #fff;
     text-align: center;
     font-size: 16pt;

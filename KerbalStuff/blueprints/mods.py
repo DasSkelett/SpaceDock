@@ -228,7 +228,6 @@ def edit_mod(mod_id: int, mod_name: str) -> Union[str, werkzeug.wrappers.Respons
         description = request.form.get('description')
         ckan = request.form.get('ckan')
         background = request.form.get('background')
-        bgOffsetY = request.form.get('bg-offset-y', 0)
         mod.license = license
         mod.donation_link = donation_link
         mod.external_link = external_link
@@ -273,10 +272,6 @@ def edit_mod(mod_id: int, mod_name: str) -> Union[str, werkzeug.wrappers.Respons
 
         if background and background != '':
             mod.background = background
-        try:
-            mod.bgOffsetY = int(bgOffsetY)
-        except:
-            pass
         return redirect(url_for("mods.mod", mod_id=mod.id, mod_name=mod.name, ga=game))
 
 

@@ -13,7 +13,7 @@ from ..objects import Mod, ModList, ModListItem, Game
 lists = Blueprint('lists', __name__, template_folder='../../templates/lists')
 
 
-def _get_mod_list(list_id: str) -> Tuple[ModList, Game, bool]:
+def _get_mod_list(list_id: int) -> Tuple[ModList, Game, bool]:
     mod_list = ModList.query.get(list_id)
     if not mod_list:
         abort(404)
@@ -67,8 +67,8 @@ def delete(list_id: str) -> werkzeug.wrappers.Response:
     return redirect("/profile/" + current_user.username)
 
 
-@lists.route("/pack/<list_id>/<list_name>")
-def view_list(list_id: str, list_name: str) -> str:
+@lists.route("/pack/<int:list_id>/<list_name>")
+def view_list(list_id: int, list_name: str) -> str:
     mod_list, ga, editable = _get_mod_list(list_id)
     return render_template("mod_list.html",
                            **{
@@ -78,10 +78,10 @@ def view_list(list_id: str, list_name: str) -> str:
                            })
 
 
-@lists.route("/pack/<list_id>/<list_name>/edit", methods=['GET', 'POST'])
+@lists.route("/pack/<int:list_id>/<list_name>/edit", methods=['GET', 'POST'])
 @with_session
 @loginrequired
-def edit_list(list_id: str, list_name: str) -> Union[str, werkzeug.wrappers.Response]:
+def edit_list(list_id: int, list_name: str) -> Union[str, werkzeug.wrappers.Response]:
     mod_list, ga, editable = _get_mod_list(list_id)
     if not editable:
         abort(403)
@@ -95,7 +95,6 @@ def edit_list(list_id: str, list_name: str) -> Union[str, werkzeug.wrappers.Resp
     else:
         description = request.form.get('description')
         background = request.form.get('background')
-        bgOffsetY = request.form.get('bg-offset-y', 0)
         mods = json.loads(request.form.get('mods', ''))
         if any(mod_list.game != Mod.query.get(mod_id).game for mod_id in mods):
             # The client validates this in a more friendly way,
@@ -104,10 +103,6 @@ def edit_list(list_id: str, list_name: str) -> Union[str, werkzeug.wrappers.Resp
         mod_list.description = description
         if background and background != '':
             mod_list.background = background
-        try:
-            mod_list.bgOffsetY = int(bgOffsetY)
-        except:
-            pass
         # Remove mods
         removed_mods = [m for m in mod_list.mods if not m.mod_id in mods]
         for mod in removed_mods:

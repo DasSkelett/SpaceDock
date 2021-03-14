@@ -8,14 +8,14 @@
     - https://github.com/miguelgrinberg/Flask-Migrate/issues/155
 """
 
-from typing import List, Optional
-from sqlalchemy import sa
+from typing import Any, List, Optional
+import sqlalchemy as sa
 
 
 class op:
 
     @classmethod
-    def get_bind(cls) -> None: ...
+    def get_bind(cls) -> sa.engine.Connection: ...
 
     @classmethod
     def f(cls,
@@ -30,6 +30,14 @@ class op:
     def drop_column(cls,
                     table_name: str,
                     column: str) -> None: ...
+
+    @classmethod
+    def alter_column(cls,
+                     table_name: str,
+                     column_name: str,
+                     existing_type: Optional[Any] = None,
+                     type_: Optional[Any] = None,
+                     existing_nullable: Optional[bool] = None) -> None: ...
 
     @classmethod
     def create_index(cls,

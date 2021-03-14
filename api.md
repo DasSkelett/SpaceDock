@@ -93,7 +93,6 @@ Gets mods sorted by selected conditions
           ],
           "id": 52,
           "background": "...",
-          "bg_offset_y": 1234,
           "short_description": "..."
         },
         ...continued...
@@ -135,7 +134,6 @@ Gets the newest mods on the site.
         ],
         "id": 52,
         "background": "...",
-        "bg_offset_y": 1234,
         "short_description": "..."
       },
       ...continued...
@@ -174,7 +172,6 @@ Gets the latest featured mods on the site.
         ],
         "id": 52,
         "background": "...",
-        "bg_offset_y": 1234,
         "short_description": "..."
       },
       ...continued...
@@ -212,7 +209,6 @@ Gets the most popular mods on the site.
         ],
         "id": 52,
         "background": "...",
-        "bg_offset_y": 1234,
         "short_description": "..."
       },
       ...continued...
@@ -255,7 +251,6 @@ Searches the site for mods.
         ],
         "id": 52,
         "background": "...",
-        "bg_offset_y": 1234,
         "short_description": "..."
       }
     ]
@@ -353,7 +348,6 @@ Returns information about a specific mod.
         }
       ],
       "background": "...",
-      "bg_offset_y": 1234,
       "description:" "...markdown...",
       "description_html": "...html...",
       "id": 21,
@@ -482,8 +476,6 @@ This will list the available games and their ids.
         "description": null,
         "created": "2019-07-16T02:34:58.756291",
         "background": null,
-        "bg_offset_x": null,
-        "bg_offset_y": null,
         "link": null
       }
     ]

@@ -39,7 +39,11 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    context.configure(url=engine.url, target_metadata=target_metadata)
+    context.configure(
+        compare_type=True,
+        target_metadata=target_metadata,
+        url=engine.url
+    )
 
     with context.begin_transaction():
         context.run_migrations()
@@ -54,6 +58,7 @@ def run_migrations_online() -> None:
     """
     connection = engine.connect()
     context.configure(
+            compare_type=True,
             connection=connection,
             target_metadata=target_metadata
     )

@@ -164,5 +164,12 @@ footer {
     height: 150px;
 }
 
+div.header {
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 400px;
+}
+
 @import "typeahead";
 @import "navigation";

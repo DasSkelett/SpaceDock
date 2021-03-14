@@ -13,6 +13,7 @@ from sqlalchemy import desc, asc
 from werkzeug.utils import secure_filename
 
 from .accounts import check_password_criteria
+from .lists import _get_mod_list
 from ..ckan import send_to_ckan, notify_ckan
 from ..common import json_output, paginate_mods, with_session, get_mods, json_response, \
     check_mod_editable, set_game_info, TRUE_STR, get_page
@@ -61,7 +62,6 @@ def mod_info(mod: Mod) -> Dict[str, Any]:
         "default_version_id": mod.default_version.id,
         "shared_authors": list(),
         "background": mod.background,
-        "bg_offset_y": mod.bgOffsetY,
         "license": mod.license,
         "website": mod.external_link,
         "donations": mod.donation_link,
@@ -100,8 +100,6 @@ def game_info(game: Game) -> Dict[str, str]:
         "description": game.description,
         "created": game.created,
         "background": game.background,
-        "bg_offset_x": game.bgOffsetX,
-        "bg_offset_y": game.bgOffsetY,
         "link": game.link,
         "short": game.short
     }
@@ -115,8 +113,6 @@ def publisher_info(publisher: Publisher) -> Dict[str, str]:
         "description": publisher.description,
         "created": publisher.created,
         "background": publisher.background,
-        "bg_offset_x": publisher.bgOffsetX,
-        "bg_offset_y": publisher.bgOffsetY,
         "link": publisher.link
     }
 
@@ -459,12 +455,28 @@ def update_mod_background(mod_id: int) -> Dict[str, Any]:
     mod = _get_mod(mod_id)
     _check_mod_editable(mod)
     seq_mod_name = secure_filename(mod.name)
-    base_name = f'{seq_mod_name}-{time.time()!s}'
-    base_path = os.path.join(f'{secure_filename(mod.user.username)}_{mod.user.id!s}', seq_mod_name)
+    base_name = f'{seq_mod_name}-header-{int(time.time())!s}'
+    base_path = os.path.join(f'{secure_filename(mod.user.username)}_{mod.user.id}', seq_mod_name)
     new_path = _update_image(mod.background, base_name, base_path)
     if new_path:
         mod.background = new_path
         notify_ckan(mod, 'update-background')
+        return {'path': '/content/' + new_path}
+    return {'path': None}
+
+
+@api.route('/api/pack/<int:list_id>/update-bg', methods=['POST'])
+@with_session
+@json_output
+@user_required
+def update_pack_background(list_id: int) -> Dict[str, Any]:
+    pack, _, editable = _get_mod_list(list_id)
+    seq_pack_name = secure_filename(pack.name)
+    base_name = f'{seq_pack_name}-header-{int(time.time())}'
+    base_path = os.path.join(f'{secure_filename(pack.user.username)}_{pack.user.id}', 'packs', seq_pack_name)
+    new_path = _update_image(pack.background, base_name, base_path)
+    if new_path:
+        pack.background = new_path
         return {'path': '/content/' + new_path}
     return {'path': None}
 
@@ -477,8 +489,9 @@ def update_user_background(username: str) -> Union[Dict[str, Any], Tuple[Dict[st
     if not current_user.admin and current_user.username != username:
         return {'error': True, 'reason': 'You are not authorized to edit this user\'s background'}, 403
     user = User.query.filter(User.username == username).first()
-    base_name = secure_filename(user.username)
-    base_path = f'{base_name}-{time.time()!s}_{user.id!s}'
+    seq_user_name = secure_filename(user.username)
+    base_name = f'{seq_user_name}-header-{int(time.time())}'
+    base_path = f'{seq_user_name}_{user.id}'
     new_path = _update_image(user.backgroundMedia, base_name, base_path)
     if new_path:
         user.backgroundMedia = new_path
