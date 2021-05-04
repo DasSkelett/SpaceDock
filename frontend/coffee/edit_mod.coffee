@@ -18,7 +18,7 @@ window.upload_bg = (files, box) ->
             progress.style.width = (e.loaded / e.total) * 100 + '%'
     xhr.onload = (e) ->
         if xhr.status != 200
-            p.textContent = 'Please upload JPG or PNG only.'
+            p.textContent = JSON.parse(xhr.responseText).reason
             setTimeout(() ->
                 box.removeChild(p)
                 box.querySelector('a').classList.remove('hidden')

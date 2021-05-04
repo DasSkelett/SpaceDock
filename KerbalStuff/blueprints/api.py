@@ -6,7 +6,6 @@ from datetime import datetime
 from functools import wraps
 from typing import Dict, Any, Callable, Optional, Tuple, Iterable, List, Union
 
-import bcrypt
 from flask import Blueprint, url_for, current_app, request, abort
 from flask_login import login_user, current_user
 from sqlalchemy import desc, asc
@@ -15,7 +14,7 @@ from werkzeug.utils import secure_filename
 from .accounts import check_password_criteria
 from ..ckan import send_to_ckan, notify_ckan
 from ..common import json_output, paginate_mods, with_session, get_mods, json_response, \
-    check_mod_editable, set_game_info, TRUE_STR, get_page
+    check_mod_editable, set_game_info, TRUE_STR, get_page, storage_write_required
 from ..config import _cfg, _cfgi
 from ..database import db
 from ..email import send_update_notification, send_grant_notice, send_password_changed
@@ -169,7 +168,7 @@ def _update_image(old_path: str, base_name: str, base_path: str) -> Optional[str
         return None
     file_type = os.path.splitext(os.path.basename(f.filename))[1].lower()
     if file_type not in ('.png', '.jpg', '.jpeg'):
-        abort(json_response({'error': True, 'reason': 'This file type is not acceptable.'}, 400))
+        abort(json_response({'error': True, 'reason': 'Please upload JPG or PNG only.'}, 400))
     filename = base_name + file_type
     full_path = os.path.join(storage, base_path)
     if not os.path.exists(full_path):
@@ -454,6 +453,7 @@ def change_password(username: str) -> Union[Dict[str, Any], Tuple[Union[str, Any
 @with_session
 @json_output
 @user_required
+@storage_write_required
 def update_mod_background(mod_id: int) -> Dict[str, Any]:
     mod = _get_mod(mod_id)
     _check_mod_editable(mod)
@@ -472,6 +472,7 @@ def update_mod_background(mod_id: int) -> Dict[str, Any]:
 @with_session
 @json_output
 @user_required
+@storage_write_required
 def update_user_background(username: str) -> Union[Dict[str, Any], Tuple[Dict[str, Any], int]]:
     if not current_user.admin and current_user.username != username:
         return {'error': True, 'reason': 'You are not authorized to edit this user\'s background'}, 403
@@ -600,6 +601,7 @@ def create_list() -> Union[Dict[str, Any], Tuple[Dict[str, Any], int]]:
 @api.route('/api/mod/create', methods=['POST'])
 @json_output
 @user_required
+@storage_write_required
 def create_mod() -> Tuple[Dict[str, Any], int]:
     if not current_user.public:
         return {'error': True, 'reason': 'Only users with public profiles may create mods.'}, 403
@@ -688,6 +690,7 @@ def create_mod() -> Tuple[Dict[str, Any], int]:
 @with_session
 @json_output
 @user_required
+@storage_write_required
 def update_mod(mod_id: int) -> Tuple[Dict[str, Any], int]:
     mod = _get_mod(mod_id)
     _check_mod_editable(mod)

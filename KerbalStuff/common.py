@@ -8,11 +8,10 @@ from typing import Union, List, Dict, Any, Optional, Callable, Tuple, Iterable
 
 import bleach
 from bleach_allowlist import bleach_allowlist
-from flask import jsonify, redirect, request, Response, abort, session
+from flask import jsonify, redirect, request, Response, abort, session, current_app
 from flask_login import current_user
 from markupsafe import Markup
-from werkzeug.exceptions import HTTPException
-from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException, ServiceUnavailable
 import werkzeug.wrappers
 from sqlalchemy.orm import Query
 
@@ -90,6 +89,18 @@ def adminrequired(f: Callable[..., Any]) -> Callable[..., Any]:
         else:
             if not current_user.admin:
                 abort(403)
+            return f(*args, **kwargs)
+
+    return wrapper
+
+
+def storage_write_required(f: Callable[..., Any]) -> Callable[..., Any]:
+    @wraps(f)
+    def wrapper(*args: str, **kwargs: int) -> Union[werkzeug.wrappers.Response, HTTPException]:
+        if current_app.config.get('STORAGE_READONLY'):
+            # TODO avoid being logged to syslog in handle_generic_exception
+            raise ServiceUnavailable(description="SpaceDock is currently in read-only mode, please try again later")
+        else:
             return f(*args, **kwargs)
 
     return wrapper

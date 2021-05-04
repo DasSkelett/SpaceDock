@@ -22,7 +22,7 @@ from werkzeug.utils import secure_filename
 from .api import default_description
 from ..ckan import send_to_ckan, notify_ckan
 from ..common import get_game_info, set_game_info, with_session, dumb_object, loginrequired, \
-    json_output, adminrequired, check_mod_editable, get_version_size, TRUE_STR
+    json_output, adminrequired, check_mod_editable, get_version_size, TRUE_STR, storage_write_required
 from ..config import _cfg
 from ..database import db
 from ..email import send_autoupdate_notification, send_mod_locked
@@ -78,6 +78,7 @@ def random_mod() -> werkzeug.wrappers.Response:
 
 
 @mods.route("/mod/<int:mod_id>/<path:mod_name>/update")
+@storage_write_required
 def update(mod_id: int, mod_name: str) -> str:
     mod = Mod.query.filter(Mod.id == mod_id).one()
     if not mod:
@@ -294,6 +295,7 @@ def edit_mod(mod_id: int, mod_name: str) -> Union[str, werkzeug.wrappers.Respons
 @mods.route("/create/mod")
 @loginrequired
 @with_session
+@storage_write_required
 def create_mod() -> str:
     ga = _restore_game_info()
     games = Game.query.filter(Game.active == True).order_by(desc(Game.id)).all()
@@ -342,6 +344,7 @@ def export_referrals(mod_id: int, mod_name: str) -> werkzeug.wrappers.Response:
 @mods.route("/mod/<int:mod_id>/delete", methods=['POST'])
 @loginrequired
 @with_session
+@storage_write_required
 def delete(mod_id: int) -> werkzeug.wrappers.Response:
     mod, game = _get_mod_game_info(mod_id)
     editable = False
@@ -596,6 +599,7 @@ _create_connection_mutex = threading.Lock()
 @mods.route('/mod/<int:mod_id>/version/<version_id>/delete', methods=['POST'])
 @with_session
 @loginrequired
+@storage_write_required
 def delete_version(mod_id: int, version_id: str) -> werkzeug.wrappers.Response:
     mod, game = _get_mod_game_info(mod_id)
     check_mod_editable(mod)

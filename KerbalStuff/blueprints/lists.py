@@ -1,5 +1,5 @@
 import json
-from typing import Tuple, List, Union, Optional
+from typing import Tuple, Union, Optional
 
 from flask import Blueprint, render_template, url_for, abort, redirect, request
 from flask_login import current_user

@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from time import strftime
 from typing import Tuple, List, Dict, Any, Optional, Union
 
+import jinja2
 import requests
 import werkzeug.wrappers
 from flask import Flask, render_template, g, url_for, Response, request
@@ -54,6 +55,9 @@ app.jinja_env.cache = None
 app.json_encoder = CustomJSONEncoder
 Markdown(app, extensions=[KerbDown(), 'fenced_code'])
 login_manager = LoginManager(app)
+app.config.update(
+    STORAGE_READONLY=_cfgb('storage-readonly', False)
+)
 
 
 @login_manager.user_loader
@@ -161,27 +165,6 @@ def handle_generic_exception(e: Union[Exception, HTTPException]) -> Union[Tuple[
         if e.description == werkzeug.exceptions.InternalServerError.description:
             e.description = "Clearly you've broken something. Maybe if you refresh no one will notice."
         return render_template("error_5XX.html", error=e), e.code or 500
-
-
-# I am unsure if this function is still needed or rather, if it still works.
-# TODO(Thomas): Investigate and remove
-@app.route('/ksp-profile-proxy/<fragment>')
-@json_output
-def profile_proxy(fragment: str) -> List[Dict[str, Any]]:
-    r = requests.post("http://forum.kerbalspaceprogram.com/ajax.php?do=usersearch",
-                      data={
-                          'securitytoken': 'guest',
-                          'do': 'usersearch',
-                          'fragment': fragment
-                      })
-    root = ET.fromstring(r.text)
-    results = list()
-    for child in root:
-        results.append({
-            'id': child.attrib['userid'],
-            'name': child.text
-        })
-    return results
 
 
 @app.route('/version')
